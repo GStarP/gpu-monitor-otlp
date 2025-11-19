@@ -1,0 +1,12 @@
+[project]
+name = "gpu-monitor-otlp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "opentelemetry-api>=1.38.0",
+    "opentelemetry-exporter-otlp>=1.38.0",
+    "opentelemetry-sdk>=1.38.0",
+    "requests>=2.32.5",
+]
