@@ -4,6 +4,8 @@
 import argparse
 import time
 import sys
+import platform
+import socket
 
 try:
     from opentelemetry.sdk.resources import Resource
@@ -40,7 +42,15 @@ def main():
         # Configure OTLP gRPC Exporter
         exporter = OTLPLogExporter(endpoint=args.url, insecure=True)
 
-        resource = Resource.create({"service.name": args.name})
+        # Get system information
+        full_os_info = f"{socket.gethostname()} | {platform.system()} {platform.release()} {platform.version()} | {platform.machine()} | {platform.processor()}"
+
+        resource = Resource.create(
+            {
+                "service.name": args.name,
+                "os.info": full_os_info,
+            }
+        )
         provider = LoggerProvider(resource=resource)
 
         # Use SimpleLogRecordProcessor for immediate export
