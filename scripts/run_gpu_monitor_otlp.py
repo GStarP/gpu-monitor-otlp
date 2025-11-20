@@ -2,7 +2,7 @@
 # pip install psutil nvidia-ml-py openlit
 
 # Example usage:
-# python scripts/run_gpu_monitor_otlp.py -u http://127.0.0.1:4317 -grpc -n local_qwen3-4b
+# python scripts/run_gpu_monitor_otlp.py -u http://127.0.0.1:4317 -n volce_qwen3-4b
 
 import platform
 import signal
@@ -34,11 +34,11 @@ def main():
     parser.add_argument("-s", "--service", default="gpu-monitor", help="Service name")
     parser.add_argument("-n", "--name", required=True, help="Distinct deployment name")
     parser.add_argument(
-        "--grpc", action="store_true", help="Use gRPC protocol for OTLP"
+        "--http", action="store_true", help="Use HTTP protocol for OTLP"
     )
     args = parser.parse_args()
 
-    if args.grpc:
+    if not args.http:
         os.environ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "grpc"
         print("enable_grpc")
 
