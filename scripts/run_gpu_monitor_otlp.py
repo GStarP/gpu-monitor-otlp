@@ -45,7 +45,10 @@ def main():
     # Add deploy.id to OTEL_RESOURCE_ATTRIBUTES
     current_attrs = os.environ.get("OTEL_RESOURCE_ATTRIBUTES", "")
 
-    new_attr = f"deploy.id={args.name},machine.hostname={socket.gethostname()},machine.system={platform.system()},machine.release={platform.release()},machine.version={platform.version()},machine.architecture={platform.machine()}"
+    hostname = socket.gethostname()
+    # ensure deploy.id is unique per machine
+    deploy_id = f"{args.name}_{hostname}"
+    new_attr = f"deploy.id={deploy_id},machine.hostname={hostname},machine.system={platform.system()},machine.release={platform.release()},machine.version={platform.version()},machine.architecture={platform.machine()}"
 
     if current_attrs:
         os.environ["OTEL_RESOURCE_ATTRIBUTES"] = f"{current_attrs},{new_attr}"
