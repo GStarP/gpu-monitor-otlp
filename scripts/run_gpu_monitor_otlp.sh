@@ -1,4 +1,7 @@
-# !/bin/bash
+#!/bin/bash
+
+# * put `run_gpu_monitor_otlp.py` in the same folder as this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # provide dns
 DNS_TO_ADD="nameserver 10.205.248.11"
@@ -37,4 +40,7 @@ export PIP_INDEX_URL="https://mirrors.aliyun.com/pypi/simple/"
 python3 -m pip install psutil nvidia-ml-py openlit
 
 # run monitor
-nohup python3 /testphi3/run_gpu_monitor_otlp.py -u http://otel-agent.em:32317 -n $1 > /proc/1/fd/1 2>&1 < /dev/null &
+python3 "$SCRIPT_DIR/run_gpu_monitor_otlp.py" -u http://otel-agent.em:32317 -n $1
+
+# run monitor (background)
+# nohup python3 "$SCRIPT_DIR/run_gpu_monitor_otlp.py" -u http://otel-agent.em:32317 -n $1 > /proc/1/fd/1 2>&1 < /dev/null &
