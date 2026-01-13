@@ -1,37 +1,17 @@
 #!/bin/bash
-
-# * put `run_gpu_monitor_otlp.py` in the same folder as this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# provide dns
-DNS_TO_ADD="nameserver 10.205.248.11"
-RESOLV_CONF="/etc/resolv.conf"
-
-if grep -qF "$DNS_TO_ADD" "$RESOLV_CONF"; then
-    echo "'$DNS_TO_ADD' already exists. No changes needed."
-else
-    echo "Adding '$DNS_TO_ADD' to $RESOLV_CONF."
-
-    TMP_FILE=$(mktemp)
-    echo "$DNS_TO_ADD" > "$TMP_FILE"
-    cat "$RESOLV_CONF" >> "$TMP_FILE"
-    cat "$TMP_FILE" > "$RESOLV_CONF"
-    rm "$TMP_FILE"
-
-    echo "$RESOLV_CONF has been updated:"
-    cat "$RESOLV_CONF"
-fi
-
-# missing param, exit
 if [ -z "$1" ]; then
-    echo "need 1 param for deploy.id"
+    echo "missing param to distinguish this deploy, e.g., 'qwen3-4b_h20'"
     exit 1
 fi
+DEPLOY_NAME="$1"
+
+REMOTE_HOST_URL=${REMOTE_HOST_URL:-"https://dd-ai-service.eastmoney.com/aip-files/f"}
+OTLP_URL=${OTLP_URL:-"http://otel-agent.em:32317"}
 
 # if proc exists, exit
-TARGET_SCRIPT="run_gpu_monitor_otlp.py"
-if ps -ef | grep "$TARGET_SCRIPT" | grep -v grep > /dev/null; then
-    echo "Monitor process '$TARGET_SCRIPT' is already running. Exiting."
+PYTHON_SCRIPT="run_gpu_monitor_otlp.py"
+if ps -ef | grep "$PYTHON_SCRIPT" | grep -v grep > /dev/null; then
+    echo "Monitor process '$PYTHON_SCRIPT' is already running. Exiting."
     exit 0
 fi
 
@@ -39,8 +19,13 @@ fi
 export PIP_INDEX_URL="https://mirrors.aliyun.com/pypi/simple/"
 python3 -m pip install psutil nvidia-ml-py openlit
 
-# run monitor
-python3 "$SCRIPT_DIR/run_gpu_monitor_otlp.py" -u http://otel-agent.em:32317 -n $1
+# download python script
+echo "Downloading $PYTHON_SCRIPT..."
+curl -fsSL "$REMOTE_HOST_URL/sh/$PYTHON_SCRIPT" -o "$PYTHON_SCRIPT"
 
-# run monitor (background)
-# nohup python3 "$SCRIPT_DIR/run_gpu_monitor_otlp.py" -u http://otel-agent.em:32317 -n $1 > /proc/1/fd/1 2>&1 < /dev/null &
+# run
+echo "Running monitor: OTLP_URL=$OTLP_URL, DEPLOY_NAME=$DEPLOY_NAME"
+nohup python3 "$PYTHON_SCRIPT" -u $OTLP_URL -n $DEPLOY_NAME > /proc/1/fd/1 2>&1 < /dev/null &
+
+
+# curl -fsSL "https://dd-ai-service.eastmoney.com/aip-files/f/sh/run_gpu_monitor_otlp.sh" | tr -d '\r' | bash -s -- "qwen3-4b_h20"

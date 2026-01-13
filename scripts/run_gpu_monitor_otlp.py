@@ -2,7 +2,7 @@
 # pip install psutil nvidia-ml-py openlit
 
 # Example usage:
-# python scripts/run_gpu_monitor_otlp.py -u http://127.0.0.1:4317 -n volce_qwen3-4b
+# python scripts/run_gpu_monitor_otlp.py -u http://127.0.0.1:4317 -n volce_qwen3-4b_h20
 
 import platform
 import signal
