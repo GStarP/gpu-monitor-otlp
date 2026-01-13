@@ -17,7 +17,17 @@ fi
 
 # install dependencies
 export PIP_INDEX_URL="https://mirrors.aliyun.com/pypi/simple/"
-python3 -m pip install psutil nvidia-ml-py openlit
+PIP_DEPS=(psutil nvidia-ml-py openlit)
+if command -v uv >/dev/null 2>&1; then
+    echo "uv found, run 'uv pip install'..."
+    uv pip install "${PIP_DEPS[@]}"
+else
+    echo "run 'python3 -m pip install'..."
+    if ! python3 -m pip install "${PIP_DEPS[@]}"; then
+        echo "run 'pip install'..."
+        pip install "${PIP_DEPS[@]}"
+    fi
+fi
 
 # download python script
 echo "Downloading $PYTHON_SCRIPT..."
